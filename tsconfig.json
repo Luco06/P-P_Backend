@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["es2020"],
+    "target": "es2020",
+    "module": "ESNext", // Changer de NodeNext à ESNext
+    "moduleResolution": "Node", // Changer de NodeNext à Node
+    "esModuleInterop": true,
+    "skipLibCheck": true, // Ajouter pour ignorer les vérifications de type dans les fichiers de déclaration
+    "strict": true, // Activer le mode strict pour une meilleure vérification des types
+    "types": ["node", "jest"] // Ajouter jest pour les types
+  },
+  "include": ["src/**/*.ts"], // Inclure tous les fichiers TypeScript dans le dossier src
+  "exclude": ["node_modules", "**/*.spec.ts"] // Exclure les fichiers de test si nécessaire
+}
