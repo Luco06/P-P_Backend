@@ -2,7 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import express from "express";
-import typeDefs from "./schemas/userSchema.js"; // Assurez-vous que l'extension est correcte
+import typeDefs from "./schemas/userSchema.js";
 import { resolvers } from "./resolvers/userResolver.js";
 import http from "http";
 import cors from "cors";
