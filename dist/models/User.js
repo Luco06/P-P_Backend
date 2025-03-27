@@ -5,6 +5,7 @@ const UserSchema = new Schema({
     email: { type: String, required: true },
     mdp: { type: String, required: true },
     avatar: String,
+    pseudo: String,
     inscriptionDate: { type: Date, default: Date.now },
     recettes: [{ type: Schema.Types.ObjectId, ref: "Recette" }]
 });

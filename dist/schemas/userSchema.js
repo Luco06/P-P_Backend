@@ -5,6 +5,7 @@ const typeDefs = `#gql
     nom: String!
     prenom: String!
     avatar: String!
+    pseudo: String!
     recettes: [Recette]  # 👈 Relation avec les recettes
   }
 
@@ -39,7 +40,7 @@ const typeDefs = `#gql
     favoris: Boolean
     auteur: User!
     dateCreation: String
-    commentaire: [Comment]  # ✅ Corrigé
+    commentaire: [Comment]  
   }
   
   type Query {
@@ -56,6 +57,7 @@ const typeDefs = `#gql
     prenom: String!
     mdp: String!
     avatar: String
+    pseudo: String
   }
 
   input UpdateUserInput {
@@ -64,6 +66,7 @@ const typeDefs = `#gql
     prenom: String
     avatar: String
     mdp: String
+    pseudo: String
   }
 
   input CreateRecetteInput {

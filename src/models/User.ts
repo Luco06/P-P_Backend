@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string,
   mdp: string;
   avatar:string;
+  pseudo: string;
   inscriptionDate: Date;
   recettes?: Types.ObjectId[],
 }
@@ -16,6 +17,7 @@ const UserSchema: Schema = new Schema({
   email: { type: String, required: true },
   mdp: { type: String, required: true},
   avatar: String,
+  pseudo:String,
   inscriptionDate: {type: Date, default: Date.now},
   recettes: [{ type: Schema.Types.ObjectId, ref: "Recette" }] 
 });
