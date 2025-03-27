@@ -1,8 +1,8 @@
 interface UserInput {
   email: string;
-  nom: String;
-  prenom: String;
-  avatar: String;
+  nom: string;
+  prenom: string;
+  avatar: string;
   mdp:string;
   recettes: any[];
 }
@@ -43,6 +43,7 @@ import { Comment as CommentModel } from "../models/Comment.js";
 import bcrypt from "bcrypt"
 import { GraphQLError } from "graphql";
 import  Jwt  from "jsonwebtoken";
+import cloudinary from "../utils/cloudinary.js";
 export const resolvers = {
   Query: {
     users: async () => await User.find().populate("recettes"),
@@ -106,7 +107,21 @@ export const resolvers = {
       if (context.user._id.toString() !== id) {
         throw new GraphQLError("Accès refusé", { extensions: { code: "UNAUTHORIZED" } });
       }
-    
+      if(input.avatar){
+        try {
+          const uploadRes = await cloudinary.uploader.upload(input.avatar, {
+            transformation: [
+              {with: 1000, crop: "limit"},
+              {quality: "auto"},
+              {fetch_format: "auto"}
+            ],
+            folder: "avatarUser"
+          });
+          input.avatar = uploadRes.secure_url;
+        } catch (error) {
+          
+        }
+      }
       if (input.mdp){
         input.mdp = await bcrypt.hash(input.mdp,10)
       }
