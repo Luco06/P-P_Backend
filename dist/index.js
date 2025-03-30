@@ -44,7 +44,9 @@ await server.start();
 // Middleware pour gérer les CORS et les requêtes
 app.use("/graphql", cors({
     origin: ["http://localhost:3000"], // Autorise Next.js
-    credentials: true, // Autorise l’envoi de cookies/tokens
+    methods: ["GET", "POST", "OPTIONS"], // Méthodes autorisées
+    allowedHeaders: ["Content-Type", "Authorization"], // En-têtes autorisés
+    credentials: true,
 }), json(), expressMiddleware(server, {
     context: async ({ req }) => {
         const token = req.headers.authorization || "";

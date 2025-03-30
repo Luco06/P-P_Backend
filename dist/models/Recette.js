@@ -10,7 +10,7 @@ const RecetteSchema = new Schema({
     est_public: { type: Boolean, required: true },
     cout: { type: String },
     note: { type: String },
-    instructions: { type: String, required: true },
+    instructions: { type: [String], required: true },
     categorie: { type: String, required: true },
     img: { type: String },
     favoris: { type: Boolean },

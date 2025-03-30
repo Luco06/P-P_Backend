@@ -26,7 +26,7 @@ const typeDefs = `#gql
     id: ID!
     titre: String!
     description: String!
-    ingredients: [String]!
+    ingredients: [String!]!
     tps_prep: String
     tps_cook: String
     nb_person: String
@@ -34,14 +34,15 @@ const typeDefs = `#gql
     est_public: Boolean!
     cout: String
     note: String
-    instructions: String!
+    instructions: [String!]!
     categorie: String!
     img: String
     favoris: Boolean
-    auteur: User!
+    auteur: User!  # Assurez-vous que le champ auteur est ici
     dateCreation: String
-    commentaire: [Comment]  
+    commentaire: [Comment]
   }
+  
   
   type Query {
     users: [User]
@@ -80,7 +81,7 @@ const typeDefs = `#gql
     est_public: Boolean!
     cout: String
     note: String
-    instructions: String!
+    instructions: [String]!
     categorie: String!
     img: String
     favoris: Boolean
@@ -98,7 +99,7 @@ const typeDefs = `#gql
     est_public: Boolean
     cout: String
     note: String
-    instructions: String
+    instructions: [String]
     categorie: String
     img: String
     favoris: Boolean

@@ -40,7 +40,7 @@ export const resolvers = {
             }
         },
         loginUser: async (_, { email, mdp }) => {
-            const user = await User.findOne({ email });
+            const user = await User.findOne({ email }).populate("recettes");
             if (!user) {
                 console.error("Utilisateur non trouvé pour l'email:", email);
                 throw new GraphQLError("utilisateur non trouvé", {
@@ -108,7 +108,7 @@ export const resolvers = {
             if (!recette) {
                 throw new GraphQLError("Recette non trouvée", { extensions: { code: "NOT_FOUND" } });
             }
-            if (recette.auteur.toString() !== context.user._id) {
+            if (recette.auteur.toString() !== context.user._id.toString()) {
                 throw new GraphQLError("Vous ne pouvez modifier que vos propres recettes", { extensions: { code: "UNAUTHORIZED" } });
             }
             return await Recette.findByIdAndUpdate(id, { $set: input }, { new: true });
@@ -122,7 +122,7 @@ export const resolvers = {
                 throw new GraphQLError("Recette non trouvée", { extensions: { code: "NOT_FOUND" } });
             }
             // Vérifie si l'utilisateur est l'auteur de la recette
-            if (recette.auteur.toString() !== context.user._id) {
+            if (recette.auteur.toString() !== context.user._id.toString()) {
                 throw new GraphQLError("Vous ne pouvez supprimer que vos propres recettes", { extensions: { code: "UNAUTHORIZED" } });
             }
             // Supprimer la recette de la base de données
@@ -172,6 +172,6 @@ export const resolvers = {
             await Recette.findByIdAndUpdate(comment.recette, { $pull: { commentaire: id } });
             return { message: "Commentaire supprimé avec succès" }; // Message de succès
         },
-    }
+    },
 };
 export default resolvers;
