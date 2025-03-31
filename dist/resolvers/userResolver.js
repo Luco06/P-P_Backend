@@ -111,6 +111,21 @@ export const resolvers = {
             if (recette.auteur.toString() !== context.user._id.toString()) {
                 throw new GraphQLError("Vous ne pouvez modifier que vos propres recettes", { extensions: { code: "UNAUTHORIZED" } });
             }
+            if (input.img) {
+                try {
+                    const uploadRes = await cloudinary.uploader.upload(input.img, {
+                        transformation: [
+                            { with: 1000, crop: "limit" },
+                            { quality: "auto" },
+                            { fetch_format: "auto" }
+                        ],
+                        folder: "avatarUser"
+                    });
+                    input.img = uploadRes.secure_url;
+                }
+                catch (error) {
+                }
+            }
             return await Recette.findByIdAndUpdate(id, { $set: input }, { new: true });
         },
         deleteRecette: async (_, { id }, context) => {
