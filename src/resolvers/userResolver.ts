@@ -135,6 +135,21 @@ export const resolvers = {
         });
         
       }
+      if(input.img){
+        try {
+          const uploadRes = await cloudinary.uploader.upload(input.img, {
+            transformation: [
+              {with: 1000, crop: "limit"},
+              {quality: "auto"},
+              {fetch_format: "auto"}
+            ],
+            folder: "imgRecipe"
+          });
+          input.img = uploadRes.secure_url;
+        } catch (error) {
+          
+        }
+      }
       const newRecette = new Recette({...input, auteur: context.user._id,});
       await newRecette.save();
 
@@ -162,7 +177,7 @@ export const resolvers = {
               {quality: "auto"},
               {fetch_format: "auto"}
             ],
-            folder: "avatarUser"
+            folder: "imgRecipe"
           });
           input.img = uploadRes.secure_url;
         } catch (error) {
