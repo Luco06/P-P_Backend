@@ -14,7 +14,6 @@ export interface IRecette extends Document {
     instructions: string[],
     categorie: string,
     img: string,
-    favoris: boolean,
     auteur: Types.ObjectId;
     dateCreation: Date;
     commentaire?: Types.ObjectId,
@@ -34,7 +33,6 @@ const RecetteSchema: Schema = new Schema({
     instructions: { type: [String], required: true },
     categorie:{type: String, required: true},
     img:{type: String},
-    favoris:{type: Boolean},
     auteur:{type: Schema.Types.ObjectId, ref: "User", required: true},
     dateCreation:{type: Date, default: Date.now},
     commentaire: [{ type: Schema.Types.ObjectId, ref: "Comment" }]

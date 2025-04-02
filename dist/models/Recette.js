@@ -13,7 +13,6 @@ const RecetteSchema = new Schema({
     instructions: { type: [String], required: true },
     categorie: { type: String, required: true },
     img: { type: String },
-    favoris: { type: Boolean },
     auteur: { type: Schema.Types.ObjectId, ref: "User", required: true },
     dateCreation: { type: Date, default: Date.now },
     commentaire: [{ type: Schema.Types.ObjectId, ref: "Comment" }]
