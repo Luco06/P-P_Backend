@@ -8,7 +8,7 @@ import cloudinary from "../utils/cloudinary.js";
 export const resolvers = {
     Query: {
         users: async () => await User.find().populate("recettes"),
-        user: async (_, { id }) => await User.findById(id).populate("recettes"),
+        user: async (_, { id }) => await User.findById(id).populate("recettes").populate("favoris"),
         recettes: async () => await Recette.find().populate("auteur"),
         recette: async (_, { id }) => {
             const recette = await Recette.findById(id).populate("auteur");
@@ -40,10 +40,18 @@ export const resolvers = {
             }
         },
         loginUser: async (_, { email, mdp }) => {
-            const user = await User.findOne({ email }).populate("recettes");
+            const user = await User.findOne({ email })
+                .populate({
+                path: "recettes",
+                populate: { path: "auteur" } // Assurez-vous de peupler l'auteur de la recette
+            })
+                .populate({
+                path: "favoris",
+                populate: { path: "auteur" } // Si vous avez un auteur dans favoris, peupler aussi
+            });
             if (!user) {
                 console.error("Utilisateur non trouvé pour l'email:", email);
-                throw new GraphQLError("utilisateur non trouvé", {
+                throw new GraphQLError("Utilisateur non trouvé", {
                     extensions: { code: 'NOT_FOUND' },
                 });
             }
@@ -58,7 +66,8 @@ export const resolvers = {
                 throw new Error("La clé secrète n'est pas définie dans les variables env");
             }
             const token = Jwt.sign({ userID: user.id }, process.env.SECRET, { expiresIn: "3h" });
-            return { token, user };
+            // Retourner l'utilisateur avec toutes ses recettes et favoris
+            return { token, user: user };
         },
         updateUser: async (_, { id, input }, context) => {
             console.log("User in context:", context.user);

@@ -28,12 +28,12 @@ interface RecetteInput {
 }
 
 interface Context {
-  user?: any; // Définit le type approprié pour l'utilisateur
+  user?: any;
 }
 
-interface CommentInput { // Interface pour l'entrée des commentaires
-  contenu: string; // Assurez-vous de définir les champs corrects selon votre modèle
-  recette: string; // ID de la recette associée
+interface CommentInput { 
+  contenu: string;
+  recette: string; 
 }
 
 
@@ -44,11 +44,10 @@ import bcrypt from "bcrypt"
 import { GraphQLError } from "graphql";
 import  Jwt  from "jsonwebtoken";
 import cloudinary from "../utils/cloudinary.js";
-import { IRecette } from "../models/Recette.js";
 export const resolvers = {
   Query: {
     users: async () => await User.find().populate("recettes"),
-    user: async (_: unknown, { id }: {id: string}) => await User.findById(id).populate("recettes"),
+    user: async (_: unknown, { id }: {id: string}) => await User.findById(id).populate("recettes").populate("favoris"),
     recettes: async () => await Recette.find().populate("auteur"),
     recette: async (_: unknown, { id }: {id: string}) => {
       const recette = await Recette.findById(id).populate("auteur")
@@ -80,26 +79,40 @@ export const resolvers = {
   
     },
     loginUser: async (_: unknown, { email, mdp }: { email: string; mdp: string }) => {
-      const user = await User.findOne({ email }).populate("recettes");
+      const user = await User.findOne({ email })
+        .populate({
+          path: "recettes",
+          populate: { path: "auteur" } 
+        })
+        .populate({
+          path: "favoris",
+          populate: { path: "auteur" } 
+        });
+    
       if (!user) {
-          console.error("Utilisateur non trouvé pour l'email:", email);
-          throw new GraphQLError("utilisateur non trouvé", {
-              extensions: { code: 'NOT_FOUND' },
-          });
+        console.error("Utilisateur non trouvé pour l'email:", email);
+        throw new GraphQLError("Utilisateur non trouvé", {
+          extensions: { code: 'NOT_FOUND' },
+        });
       }
+    
       const isPasswordValid = await bcrypt.compare(mdp, user.mdp);
       if (!isPasswordValid) {
-          console.error("Mot de passe invalide pour l'email:", email);
-          throw new GraphQLError("Mot de passe invalide", {
-              extensions: { code: 'UNAUTHORIZED' },
-          });
-      }  
-      if (!process.env.SECRET){
-        throw new Error( "La clé secrète n'est pas définie dans les variables env")
+        console.error("Mot de passe invalide pour l'email:", email);
+        throw new GraphQLError("Mot de passe invalide", {
+          extensions: { code: 'UNAUTHORIZED' },
+        });
       }
-      const token = Jwt.sign({userID: user.id}, process.env.SECRET,{expiresIn: "3h"})
-      return {token, user}
-    },
+    
+      if (!process.env.SECRET) {
+        throw new Error("La clé secrète n'est pas définie dans les variables env");
+      }
+    
+      const token = Jwt.sign({ userID: user.id }, process.env.SECRET, { expiresIn: "3h" });
+    
+  
+      return { token, user: user };
+    },    
     updateUser: async(_:unknown, {id, input}: {id:string; input: Partial<UserInput>}, context: any)=>{
       console.log("User in context:", context.user);
       if (!context.user){
@@ -153,7 +166,6 @@ export const resolvers = {
       const newRecette = new Recette({...input, auteur: context.user._id,});
       await newRecette.save();
 
-      // Ajouter la recette à l'utilisateur
       await User.findByIdAndUpdate(context.user._id, { $push: { recettes: newRecette._id } });
 
     return await Recette.findById(newRecette._id).populate("auteur")
@@ -196,18 +208,16 @@ export const resolvers = {
           throw new GraphQLError("Recette non trouvée", { extensions: { code: "NOT_FOUND" } });
       }
 
-      // Vérifie si l'utilisateur est l'auteur de la recette
+    
       if (recette.auteur.toString() !== context.user._id.toString()) {
           throw new GraphQLError("Vous ne pouvez supprimer que vos propres recettes", { extensions: { code: "UNAUTHORIZED" } });
       }
 
-      // Supprimer la recette de la base de données
       await Recette.findByIdAndDelete(id);
 
-      // Optionnel : retirer l'ID de la recette du tableau 'recettes' de l'utilisateur
       await User.findByIdAndUpdate(context.user._id, { $pull: { recettes: id } });
 
-      return { message: "Recette supprimée avec succès" }; // Message de succès
+      return { message: "Recette supprimée avec succès" };
   },
     createComment: async (_: unknown, { input }: { input: CommentInput }, context: any) => {
       if (!context.user) {
@@ -231,7 +241,6 @@ export const resolvers = {
       }
       return await CommentModel.findByIdAndUpdate(id, { $set: input }, { new: true });
     },
-    // Dans tes résolveurs...
 deleteComment: async (_: unknown, { id }: { id: string }, context: any) => {
   if (!context.user) {
       throw new GraphQLError("Authentification requise", { extensions: { code: "UNAUTHENTICATED" } });
@@ -242,18 +251,16 @@ deleteComment: async (_: unknown, { id }: { id: string }, context: any) => {
       throw new GraphQLError("Commentaire non trouvé", { extensions: { code: "NOT_FOUND" } });
   }
 
-  // Vérifie si l'utilisateur est l'auteur du commentaire
+
   if (comment.auteur.toString() !== context.user._id) {
       throw new GraphQLError("Vous ne pouvez supprimer que vos propres commentaires", { extensions: { code: "UNAUTHORIZED" } });
   }
 
-  // Supprimer le commentaire de la base de données
   await CommentModel.findByIdAndDelete(id);
 
-  // Optionnel : retirer l'ID du commentaire de la recette associée
   await Recette.findByIdAndUpdate(comment.recette, { $pull: { commentaire: id } });
 
-  return { message: "Commentaire supprimé avec succès" }; // Message de succès
+  return { message: "Commentaire supprimé avec succès" };
 },
 
   },
