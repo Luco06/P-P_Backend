@@ -7,6 +7,7 @@ const UserSchema = new Schema({
     avatar: String,
     pseudo: String,
     inscriptionDate: { type: Date, default: Date.now },
+    favoris: [{ type: Schema.Types.ObjectId, ref: "Recette" }],
     recettes: [{ type: Schema.Types.ObjectId, ref: "Recette" }]
 });
 export const User = mongoose.model('User', UserSchema);

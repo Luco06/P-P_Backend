@@ -8,6 +8,7 @@ export interface IUser extends Document {
   avatar:string;
   pseudo: string;
   inscriptionDate: Date;
+  favoris?: Types.ObjectId[],
   recettes?: Types.ObjectId[],
 }
 
@@ -19,6 +20,7 @@ const UserSchema: Schema = new Schema({
   avatar: String,
   pseudo:String,
   inscriptionDate: {type: Date, default: Date.now},
+  favoris: [{ type: Schema.Types.ObjectId, ref: "Recette"}],
   recettes: [{ type: Schema.Types.ObjectId, ref: "Recette" }] 
 });
 
