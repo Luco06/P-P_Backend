@@ -48,7 +48,17 @@ export const resolvers = {
   Query: {
     users: async () => await User.find().populate("recettes"),
     user: async (_: unknown, { id }: {id: string}) => await User.findById(id).populate("recettes").populate("favoris"),
-    recettes: async () => await Recette.find().populate("auteur"),
+    recettes: async () => {
+      return await Recette.find()
+        .populate("auteur")
+        .populate({
+          path: "commentaire",
+          populate: {
+            path: "auteur",
+            model: "User"
+          }
+        });
+    },
     recette: async (_: unknown, { id }: {id: string}) => {
       const recette = await Recette.findById(id).populate("auteur")
       if(!recette){

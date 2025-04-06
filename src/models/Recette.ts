@@ -16,27 +16,27 @@ export interface IRecette extends Document {
     img: string,
     auteur: Types.ObjectId;
     dateCreation: Date;
-    commentaire?: Types.ObjectId,
+    commentaire?: Types.ObjectId[],
 }
 
 const RecetteSchema: Schema = new Schema({
-    titre: {type: String, required: true},
-    description:{type: String, required: true},
-    ingredients:{type: [String], required: true},
-    tps_prep:{type: String },
-    tps_cook:{type: String },
-    nb_person:{type: String },
-    dificulty:{type: String, required: true},
-    est_public:{type: Boolean, required: true},
-    cout:{type: String},
-    note:{type: String},
+    titre: { type: String, required: true },
+    description: { type: String, required: true },
+    ingredients: { type: [String], required: true },
+    tps_prep: { type: String },
+    tps_cook: { type: String },
+    nb_person: { type: String },
+    dificulty: { type: String, required: true },
+    est_public: { type: Boolean, required: true },
+    cout: { type: String },
+    note: { type: String },
     instructions: { type: [String], required: true },
-    categorie:{type: String, required: true},
-    img:{type: String},
-    auteur:{type: Schema.Types.ObjectId, ref: "User", required: true},
-    dateCreation:{type: Date, default: Date.now},
-    commentaire: [{ type: Schema.Types.ObjectId, ref: "Comment" }]
+    categorie: { type: String, required: true },
+    img: { type: String },
+    auteur: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    dateCreation: { type: Date, default: Date.now },
+    commentaire: [{ type: Schema.Types.ObjectId, ref: "Comment" }] // Assurez-vous que c'est défini comme un tableau
+});
 
-})
 
 export const Recette = mongoose.model<IRecette>("Recette", RecetteSchema);

@@ -15,6 +15,6 @@ const RecetteSchema = new Schema({
     img: { type: String },
     auteur: { type: Schema.Types.ObjectId, ref: "User", required: true },
     dateCreation: { type: Date, default: Date.now },
-    commentaire: [{ type: Schema.Types.ObjectId, ref: "Comment" }]
+    commentaire: [{ type: Schema.Types.ObjectId, ref: "Comment" }] // Assurez-vous que c'est défini comme un tableau
 });
 export const Recette = mongoose.model("Recette", RecetteSchema);

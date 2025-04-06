@@ -41,7 +41,7 @@ const typeDefs = `#gql
     favoris: Boolean
     auteur: User!  # Assurez-vous que le champ auteur est ici
     dateCreation: String
-    commentaire: [Comment]
+    commentaire: [Comment]!
   }
   
   
