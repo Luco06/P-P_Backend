@@ -60,8 +60,8 @@ export const resolvers = {
                 path: "commentaire",
                 populate: {
                     path: "auteur",
-                    model: "User"
-                }
+                    model: "User",
+                },
             });
         },
         recette: async (_, { id }) => {
@@ -260,8 +260,7 @@ export const resolvers = {
                 $push: { commentaire: newComment._id },
             });
             // Peupler les infos nécessaires pour le retour GraphQL
-            const populatedComment = await CommentModel.findById(newComment._id)
-                .populate({
+            const populatedComment = await CommentModel.findById(newComment._id).populate({
                 path: "auteur",
                 select: "avatar prenom", // Sélectionne seulement les champs nécessaires
             });
@@ -296,7 +295,7 @@ export const resolvers = {
                     extensions: { code: "NOT_FOUND" },
                 });
             }
-            if (comment.auteur.toString() !== context.user._id) {
+            if (comment.auteur.toString() !== context.user._id.toString()) {
                 throw new GraphQLError("Vous ne pouvez supprimer que vos propres commentaires", { extensions: { code: "UNAUTHORIZED" } });
             }
             await CommentModel.findByIdAndDelete(id);

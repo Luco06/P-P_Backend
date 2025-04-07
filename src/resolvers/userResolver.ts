@@ -101,8 +101,8 @@ export const resolvers = {
           path: "commentaire",
           populate: {
             path: "auteur",
-            model: "User"
-          }
+            model: "User",
+          },
         });
     },
     recette: async (_: unknown, { id }: { id: string }) => {
@@ -330,28 +330,29 @@ export const resolvers = {
           extensions: { code: "UNAUTHENTICATED" },
         });
       }
-    
+
       const newComment = new CommentModel({
         ...input,
         auteur: context.user._id,
       });
-    
+
       await newComment.save();
-    
+
       // Ajouter le commentaire à la recette
       await Recette.findByIdAndUpdate(input.recette, {
         $push: { commentaire: newComment._id },
       });
-    
+
       // Peupler les infos nécessaires pour le retour GraphQL
-      const populatedComment = await CommentModel.findById(newComment._id)
-        .populate({
-          path: "auteur",
-          select: "avatar prenom", // Sélectionne seulement les champs nécessaires
-        });
-    
+      const populatedComment = await CommentModel.findById(
+        newComment._id
+      ).populate({
+        path: "auteur",
+        select: "avatar prenom", // Sélectionne seulement les champs nécessaires
+      });
+
       return populatedComment;
-    },    
+    },
     updateComment: async (
       _: unknown,
       { id, input }: { id: string; input: Partial<CommentInput> },
@@ -393,14 +394,12 @@ export const resolvers = {
           extensions: { code: "NOT_FOUND" },
         });
       }
-
-      if (comment.auteur.toString() !== context.user._id) {
+      if (comment.auteur.toString() !== context.user._id.toString()) {
         throw new GraphQLError(
           "Vous ne pouvez supprimer que vos propres commentaires",
           { extensions: { code: "UNAUTHORIZED" } }
         );
       }
-
       await CommentModel.findByIdAndDelete(id);
 
       await Recette.findByIdAndUpdate(comment.recette, {
