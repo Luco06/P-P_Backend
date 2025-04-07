@@ -330,16 +330,28 @@ export const resolvers = {
           extensions: { code: "UNAUTHENTICATED" },
         });
       }
+    
       const newComment = new CommentModel({
         ...input,
         auteur: context.user._id,
       });
+    
       await newComment.save();
+    
+      // Ajouter le commentaire à la recette
       await Recette.findByIdAndUpdate(input.recette, {
         $push: { commentaire: newComment._id },
       });
-      return newComment;
-    },
+    
+      // Peupler les infos nécessaires pour le retour GraphQL
+      const populatedComment = await CommentModel.findById(newComment._id)
+        .populate({
+          path: "auteur",
+          select: "avatar prenom", // Sélectionne seulement les champs nécessaires
+        });
+    
+      return populatedComment;
+    },    
     updateComment: async (
       _: unknown,
       { id, input }: { id: string; input: Partial<CommentInput> },
