@@ -55,15 +55,9 @@ const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 app.use(
   "/graphql",
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: ["http://localhost:3000","https://p-p-web-app.vercel.app" ], 
+    methods: ["GET", "POST", "OPTIONS"], // Méthodes autorisées
+    allowedHeaders: ["Content-Type", "Authorization"], // En-têtes autorisés
     credentials: true,
   }),
   json(),
