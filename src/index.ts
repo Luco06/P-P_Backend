@@ -50,14 +50,20 @@ const server = new ApolloServer({
   
 
 await server.start();
-
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 // Middleware pour gérer les CORS et les requêtes
 app.use(
   "/graphql",
   cors({
-    origin: ["http://localhost:3000"], // Autorise Next.js
-    methods: ["GET", "POST", "OPTIONS"], // Méthodes autorisées
-    allowedHeaders: ["Content-Type", "Authorization"], // En-têtes autorisés
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
   json(),
