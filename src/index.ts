@@ -28,7 +28,7 @@ const { json } = pkg;
 // CORS global
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://p-pwebapp-production.up.railway.app",
+  "https://p-pwebapp-production.up.railway.app/",
 ];
 
 app.use(
