@@ -55,7 +55,7 @@ const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 app.use(
   "/graphql",
   cors({
-    origin: ["http://localhost:3000","https://p-p-web-app.vercel.app" ], 
+    origin: ["http://localhost:3000","https://p-pwebapp-production.up.railway.app" ], 
     methods: ["GET", "POST", "OPTIONS"], // Méthodes autorisées
     allowedHeaders: ["Content-Type", "Authorization"], // En-têtes autorisés
     credentials: true,
