@@ -9,90 +9,101 @@ import cors from "cors";
 import pkg from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import  Jwt  from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { User } from "./models/User.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
-
+// Setup __dirname pour ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Charger .env
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 const httpServer = http.createServer(app);
 const { json } = pkg;
 
-// Connexion à MongoDB
-const connectToDatabase = async () => {
-  const dbUrl = process.env.DB_URL; // Assurez-vous que DB_URL est défini dans .env
-  if (!dbUrl) {
-    throw new Error("DB_URL is not defined in .env");
-  }
+// CORS global
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://p-pwebapp-production.up.railway.app",
+];
 
-  try {
-    await mongoose.connect(dbUrl, {
-    });
-    console.log("✅ Connected to MongoDB");
-  } catch (error) {
-    console.error("❌ Error connecting to MongoDB:", error);
-    process.exit(1); // Quitter le processus si la connexion échoue
-  }
-};
-
-// Création du serveur Apollo
-const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-  });
-  
-
-await server.start();
-// Middleware pour gérer les CORS et les requêtes
 app.use(
-  "/graphql",
   cors({
-    origin: ["http://localhost:3000","https://p-pwebapp-production.up.railway.app" ], 
-    methods: ["GET", "POST", "OPTIONS"], 
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS Error: Origin ${origin} not allowed.`));
+      }
+    },
     credentials: true,
-  }),
-  json(),
-  expressMiddleware(server, {
-    context: async ({ req }) => {
-        const token = req.headers.authorization || "";
-        let user = null;
-        if (!process.env.SECRET){
-          throw new Error( "La clé secrète n'est pas définie dans les variables env")
-        }
-      if (token){
-          try {
-              const decoded: any = Jwt.verify(
-                  token.replace("Bearer ", ""), process.env.SECRET
-              );
-              user = await User.findById(decoded.userID)
-              console.log(token)
-              console.log("Decoded userID:", decoded.userID);
-          } catch (error) {
-            console.warn("Token invalide ou expiré");
-          }
-        }
-    
-        return { user }; // Si user est null, cela signifie que l'utilisateur n'est pas authentifié
-      },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Démarrer le serveur
-await new Promise<void>((resolve) =>
-{const PORT = process.env.PORT || 4000;
-  httpServer.listen({ port: PORT }, resolve);
+app.use(json());
+
+// Connexion Mongo
+const connectToDatabase = async () => {
+  const dbUrl = process.env.DB_URL;
+  if (!dbUrl) throw new Error("DB_URL is not defined in .env");
+
+  try {
+    await mongoose.connect(dbUrl);
+    console.log("✅ Connected to MongoDB");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    process.exit(1);
   }
+};
+
+// Apollo server
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+});
+
+await server.start();
+
+// Middleware GraphQL
+app.use(
+  "/graphql",
+  expressMiddleware(server, {
+    context: async ({ req }) => {
+      const token = req.headers.authorization || "";
+      let user = null;
+
+      try {
+        if (token && process.env.SECRET) {
+          const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.SECRET);
+
+          if (typeof decoded !== "string") {
+            const payload = decoded as JwtPayload;
+            if (payload.userID) {
+              user = await User.findById(payload.userID);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("⚠️ Invalid or expired token");
+      }
+
+      return { user };
+    },
+  })
 );
 
-console.log("🚀 Server ready at http://localhost:4000/graphql");
+// Start server
+const PORT = process.env.PORT || 4000;
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+});
 
-// Connexion à la base de données
+// Connect DB
 await connectToDatabase();
