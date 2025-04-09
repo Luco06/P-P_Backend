@@ -50,14 +50,13 @@ const server = new ApolloServer({
   
 
 await server.start();
-const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
 // Middleware pour gérer les CORS et les requêtes
 app.use(
   "/graphql",
   cors({
     origin: ["http://localhost:3000","https://p-pwebapp-production.up.railway.app" ], 
-    methods: ["GET", "POST", "OPTIONS"], // Méthodes autorisées
-    allowedHeaders: ["Content-Type", "Authorization"], // En-têtes autorisés
+    methods: ["GET", "POST", "OPTIONS"], 
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
   json(),
@@ -88,7 +87,9 @@ app.use(
 
 // Démarrer le serveur
 await new Promise<void>((resolve) =>
-  httpServer.listen({ port: 4000 }, resolve)
+{const PORT = process.env.PORT || 4000;
+  httpServer.listen({ port: PORT }, resolve);
+  }
 );
 
 console.log("🚀 Server ready at http://localhost:4000/graphql");
