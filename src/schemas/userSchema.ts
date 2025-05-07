@@ -4,8 +4,8 @@ const typeDefs = `#gql
     email: String!
     nom: String!
     prenom: String!
-    avatar: String!
-    pseudo: String!
+    avatar: String
+    pseudo: String
     favoris: [Recette]
     recettes: [Recette]  # 👈 Relation avec les recettes
   }
